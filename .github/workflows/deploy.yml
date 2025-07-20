@@ -11,7 +11,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  BUCKET_NAME: austin-obioma-tfstate-1
+  BUCKET_NAME: obioma-okorowu-tfstate-1
   TF_KEY: ec2-infra/terraform.tfstate
 
 jobs:
@@ -35,18 +35,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Check if S3 bucket exists
+      - name: Check if S3 bucket exists and is accessible
         id: check_bucket
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          if aws s3api head-bucket --bucket "austin-obioma-tfstate-1" 2>/dev/null; then
-            echo "exists=true" >> $GITHUB_ENV
-          else
+          if aws s3api head-bucket --bucket "obioma-okorowu-tfstate-1" 2>&1 | tee result.log | grep -q 'Not Found'; then
             echo "exists=false" >> $GITHUB_ENV
+          elif grep -q 'Forbidden' result.log; then
+            echo "Bucket exists but not owned or accessible."
+            echo "exists=false" >> $GITHUB_ENV
+          else
+            echo "exists=true" >> $GITHUB_ENV
           fi
+
       - name: Init & Apply Bootstrap
         if: steps.check_bucket.outputs.exists == 'false'
         working-directory: bootstrap
@@ -78,7 +82,7 @@ jobs:
       - name: Terraform Init (with backend)
         run: |
           terraform -chdir=infra init \
-            -backend-config="bucket=austin-obioma-tfstate-1" \
+            -backend-config="bucket=obioma-okorowu-tfstate-1" \
             -backend-config="key=ec2-infra/terraform.tfstate" \
             -backend-config="region=us-east-1"
 
