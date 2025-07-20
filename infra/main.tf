@@ -7,18 +7,18 @@ data "aws_vpc" "default" {
 }
 
 
-resource "tls_private_key" "ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 2048
-}
-
-resource "aws_key_pair" "generated_key" {
-  key_name   = var.key_name
-  public_key = tls_private_key.ssh_key.public_key_openssh
-}
+# resource "tls_private_key" "ssh_key" {
+#   algorithm = "RSA"
+#   rsa_bits  = 2048
+# }
+#
+# resource "aws_key_pair" "generated_key" {
+#   key_name   = var.key_name
+#   public_key = tls_private_key.ssh_key.public_key_openssh
+# }
 
 resource "aws_security_group" "ec2_sg" {
-  name        = "ec2-allow-web-and-ssh"
+  name        = "ec2-sec-group"
   description = "Allow SSH, HTTP, HTTPS, and app ports"
   vpc_id      = data.aws_vpc.default.id
 
@@ -79,14 +79,14 @@ resource "aws_security_group" "ec2_sg" {
   }
 
   tags = {
-    Name = "ec2-allow-web-and-ssh"
+    Name = "ec2-sec-group"
   }
 }
 
 resource "aws_instance" "nginx" {
   ami           = "ami-084568db4383264d4"
   instance_type = var.instance_type
-  key_name      = aws_key_pair.generated_key.key_name
+  key_name      = var.key_name
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   tags = {
@@ -96,7 +96,7 @@ resource "aws_instance" "nginx" {
 resource "aws_instance" "apache" {
   ami           = "ami-084568db4383264d4"
   instance_type = var.instance_type
-  key_name      = aws_key_pair.generated_key.key_name
+  key_name      = var.key_name
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   tags = {
@@ -107,7 +107,7 @@ resource "aws_instance" "apache" {
 resource "aws_instance" "mysql" {
   ami           = "ami-084568db4383264d4"
   instance_type = var.instance_type
-  key_name      = aws_key_pair.generated_key.key_name
+  key_name      = var.key_name
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
 
   tags = {
