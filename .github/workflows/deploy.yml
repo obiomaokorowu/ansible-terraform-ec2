@@ -42,14 +42,21 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          if aws s3api head-bucket --bucket "obioma-okorowu-tfstate-1" 2>&1 | tee result.log | grep -q 'Not Found'; then
+          result=$(aws s3api head-bucket --bucket "obioma-okorowu-tfstate-1" 2>&1)
+          if echo "$result" | grep -q 'Not Found'; then
+            echo "exists=false"
             echo "exists=false" >> $GITHUB_ENV
-          elif grep -q 'Forbidden' result.log; then
+            echo "::set-output name=exists::false"
+          elif echo "$result" | grep -q 'Forbidden'; then
             echo "Bucket exists but not owned or accessible."
             echo "exists=false" >> $GITHUB_ENV
+            echo "::set-output name=exists::false"
           else
+            echo "exists=true"
             echo "exists=true" >> $GITHUB_ENV
+            echo "::set-output name=exists::true"
           fi
+      
 
       - name: Init & Apply Bootstrap
         if: steps.check_bucket.outputs.exists == 'false'
@@ -57,6 +64,7 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve -input=false
+  
 
   provision:
     name: Provision EC2 + KeyPair
