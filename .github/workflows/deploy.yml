@@ -11,7 +11,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  BUCKET_NAME: obioma-okorowu-tfstate-1
+  BUCKET_NAME: realcloud-tfstate-bucket-001
   TF_KEY: ec2-infra/terraform.tfstate
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          result=$(aws s3api head-bucket --bucket "obioma-okorowu-tfstate-1" 2>&1)
+          result=$(aws s3api head-bucket --bucket "realcloud-tfstate-bucket-001" 2>&1)
           if echo "$result" | grep -q 'Not Found'; then
             echo "exists=false"
             echo "exists=false" >> $GITHUB_ENV
@@ -90,7 +90,7 @@ jobs:
       - name: Terraform Init (with backend)
         run: |
           terraform -chdir=infra init \
-            -backend-config="bucket=obioma-okorowu-tfstate-1" \
+            -backend-config="bucket=realcloud-tfstate-bucket-001" \
             -backend-config="key=ec2-infra/terraform.tfstate" \
             -backend-config="region=us-east-1"
 
