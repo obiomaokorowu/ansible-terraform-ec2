@@ -4,6 +4,12 @@ output "private_key_pem_base64" {
 }
 
 
-output "instance_public_ip" {
-  value = aws_instance.ec2.public_ip
+output "public_ips" {
+  description = "Public IPs of the EC2 instances"
+  value = {
+    nginx  = aws_instance.nginx.public_ip
+    apache = aws_instance.apache.public_ip
+    mysql  = aws_instance.mysql.public_ip
+  }
 }
+

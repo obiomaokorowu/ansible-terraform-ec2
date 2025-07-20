@@ -1,1 +1,1 @@
-bucket_name = "austinobioma-tfstate-001"
+bucket_name = "austin-obioma-tfstate-1"

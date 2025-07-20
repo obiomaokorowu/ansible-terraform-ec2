@@ -11,7 +11,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  BUCKET_NAME: austinobioma-tfstate-001
+  BUCKET_NAME: austin-obioma-tfstate-1
   TF_KEY: ec2-infra/terraform.tfstate
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          if aws s3api head-bucket --bucket "austinobioma-tfstate-001" 2>/dev/null; then
+          if aws s3api head-bucket --bucket "austin-obioma-tfstate-1" 2>/dev/null; then
             echo "exists=true" >> $GITHUB_ENV
           else
             echo "exists=false" >> $GITHUB_ENV
@@ -78,7 +78,7 @@ jobs:
       - name: Terraform Init (with backend)
         run: |
           terraform -chdir=infra init \
-            -backend-config="bucket=austinobioma-tfstate-001" \
+            -backend-config="bucket=austin-obioma-tfstate-1" \
             -backend-config="key=ec2-infra/terraform.tfstate" \
             -backend-config="region=us-east-1"
 
